@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Unicode ↔ Text Converter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      user-select: none;
+    }
+    textarea {
+      max-height: 200px;
+      user-select: text;
+      outline: none;
+      transition: box-shadow 0.3s;
+    }
+    textarea:hover,
+    textarea:focus {
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.5);
+    }
+    /* Toast styling */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #22c55e; /* Tailwind green-500 */
+      color: white;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 14px rgb(34 197 94 / 0.5);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(20px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 9999;
+    }
+    #toast.show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body
+  class="bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 min-h-screen flex items-center justify-center px-4 py-8"
+>
+  <div
+    class="bg-white shadow-2xl rounded-2xl w-full max-w-2xl p-6 md:p-10 space-y-6"
+  >
+    <h2
+      class="text-2xl md:text-3xl font-semibold text-center text-purple-700 select-none"
+    >
+      <i class="fas fa-code mr-2 text-indigo-500"></i> Unicode ↔ Text Converter
+    </h2>
+
+    <!-- Input -->
+    <div>
+      <textarea
+        id="input"
+        placeholder="Enter text or unicode..."
+        class="w-full p-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-400 transition overflow-auto"
+      ></textarea>
+    </div>
+
+    <!-- Buttons -->
+    <div
+      class="flex flex-col sm:flex-row justify-center sm:justify-between gap-4"
+    >
+      <button
+        id="btnToUnicode"
+        class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg shadow hover:shadow-lg transition"
+      >
+        <i class="fas fa-arrow-up mr-2"></i> To Unicode
+      </button>
+      <button
+        id="btnToText"
+        class="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-6 rounded-lg shadow hover:shadow-lg transition"
+      >
+        <i class="fas fa-arrow-down mr-2"></i> To Text
+      </button>
+    </div>
+
+    <!-- Output with sticky copy button -->
+    <div class="relative">
+      <textarea
+        id="output"
+        readonly
+        placeholder="Output will appear here..."
+        class="w-full p-3 pr-12 rounded-lg border border-gray-300 bg-gray-100 shadow-sm overflow-auto"
+      ></textarea>
+
+      <button
+        id="copyBtn"
+        onclick="copyOutput()"
+        class="absolute top-2 right-2 text-sm bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md shadow transition-all hidden"
+        title="Copy Output"
+      >
+        <i class="fas fa-copy"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast">Copied to clipboard!</div>
+
+  <script>
+    const input = document.getElementById("input");
+    const output = document.getElementById("output");
+    const copyBtn = document.getElementById("copyBtn");
+    const toast = document.getElementById("toast");
+
+    // Show/hide copy button based on output content
+    function updateCopyBtnVisibility() {
+      if (output.value.trim().length > 0) {
+        copyBtn.classList.remove("hidden");
+      } else {
+        copyBtn.classList.add("hidden");
+      }
+    }
+
+    // Convert Text to Unicode
+    function toUnicode() {
+      let val = input.value;
+      let unicode = "";
+      for (let i = 0; i < val.length; i++) {
+        unicode += "&#" + val.charCodeAt(i) + ";";
+      }
+      output.value = unicode;
+      updateCopyBtnVisibility();
+    }
+
+    // Convert Unicode to Text
+    function toText() {
+      let val = input.value;
+      const textarea = document.createElement("textarea");
+      textarea.innerHTML = val;
+      output.value = textarea.value;
+      updateCopyBtnVisibility();
+    }
+
+    // Copy output & show toast
+    function copyOutput() {
+      output.select();
+      output.setSelectionRange(0, 99999); // For mobile devices
+      navigator.clipboard.writeText(output.value).then(() => {
+        showToast();
+      });
+    }
+
+    // Toast show & hide logic
+    function showToast() {
+      toast.classList.add("show");
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 3000);
+    }
+
+    // Attach button events
+    document.getElementById("btnToUnicode").addEventListener("click", toUnicode);
+    document.getElementById("btnToText").addEventListener("click", toText);
+
+    // Hide copy button initially
+    updateCopyBtnVisibility();
+  </script>
+</body>
+</html>
